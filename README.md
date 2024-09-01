@@ -22,14 +22,13 @@ chmod +x ./nixpm.sh
 ./nixpm.sh packages here separated by spaces # this will go to .config/home-manager/
 sudo ./nixpm.sh same thing as above # but the packages will be sent to /etc/nixos/
 
-```
 
-After the packages.nix file is generated, you do need to import on either `configuration.nix` or `home.nix`
-you know how that goes,
-```nix
-imports = [
-    ./packages.nix
-  ];
+# ^-- basic usage 
+
+nixpm.sh -r/--remove <packages>
+         -a/--add (default) <packages>
+         -h/--help 
+
 ```
 
 ------
