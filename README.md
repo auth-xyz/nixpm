@@ -24,6 +24,14 @@ sudo ./nixpm.sh same thing as above # but the packages will be sent to /etc/nixo
 
 ```
 
+After the packages.nix file is generated, you do need to import on either `configuration.nix` or `home.nix`
+you know how that goes,
+```nix
+imports = [
+    ./packages.nix
+  ];
+```
+
 ------
 
 #### Contributing
