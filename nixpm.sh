@@ -6,25 +6,52 @@ SYSTEM_PACKAGES="/etc/nixos/packages.nix"
 USER_CONFIG="$HOME/.config/home-manager/home.nix"
 USER_PACKAGES="$HOME/.config/home-manager/packages.nix"
 
+# Function to check if a package exists in nixpkgs
+search_package() {
+    package_name=$1
+    echo "Searching nixpkgs for: $package_name"
+    if nix-env -q -v 0 "$package_name" | grep -q "$package_name"; then
+        echo "Found package: $package_name"
+        return 0
+    else
+        echo "Package $package_name not found."
+        return 1
+    fi
+}
+
 # Function to add a package to the system config
 add_system_package() {
     package_name=$1
-    if grep -q "\b$package_name\b" "$SYSTEM_PACKAGES"; then
-        echo "$package_name is already in the system configuration."
+    if search_package "$package_name"; then
+        if grep -q "\b$package_name\b" "$SYSTEM_PACKAGES"; then
+            echo "$package_name is already in the system configuration."
+        else
+            sed -i "/environment.systemPackages = with pkgs;/a \    $package_name" "$SYSTEM_PACKAGES"
+            echo "Added $package_name to system configuration."
+        fi
     else
-        sed -i "/environment.systemPackages = with pkgs;/a \    $package_name" "$SYSTEM_PACKAGES"
-        echo "Added $package_name to system configuration."
+        read -p "Is the package name $package_name correct? (y/n): " correct_response
+        if [[ "$correct_response" =~ ^[Yy]$ ]]; then
+            echo "Please check the package name or add it manually."
+        fi
     fi
 }
 
 # Function to add a package to the user config
 add_user_package() {
     package_name=$1
-    if grep -q "\b$package_name\b" "$USER_PACKAGES"; then
-        echo "$package_name is already in the user configuration."
+    if search_package "$package_name"; then
+        if grep -q "\b$package_name\b" "$USER_PACKAGES"; then
+            echo "$package_name is already in the user configuration."
+        else
+            sed -i "/home.packages = with pkgs;/a \    $package_name" "$USER_PACKAGES"
+            echo "Added $package_name to user configuration."
+        fi
     else
-        sed -i "/home.packages = with pkgs;/a \    $package_name" "$USER_PACKAGES"
-        echo "Added $package_name to user configuration."
+        read -p "Is the package name $package_name correct? (y/n): " correct_response
+        if [[ "$correct_response" =~ ^[Yy]$ ]]; then
+            echo "Please check the package name or add it manually."
+        fi
     fi
 }
 
@@ -61,7 +88,7 @@ prompt_for_import() {
     else
         read -p "Would you like to import packages.nix into $config_file? (y/n): " import_response
         if [[ "$import_response" =~ ^[Yy]$ ]]; then
-            # Insert the import line before the closing `];`
+            # Insert the import line before the closing ];
             sed -i "/imports = \[/a \  ./packages.nix" "$config_file"
             echo "Imported packages.nix into $config_file."
         fi
@@ -91,6 +118,12 @@ display_help() {
     echo "  -r, --remove      Remove packages"
     echo "  -h, --help        Display this help message"
 }
+
+# Check if no arguments are provided
+if [ "$#" -eq 0 ]; then
+    display_help
+    exit 0
+fi
 
 # Parse command-line options
 action="add"  # default action
