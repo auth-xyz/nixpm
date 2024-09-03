@@ -126,5 +126,42 @@ done
 if [ "$EUID" -eq 0 ]; then
     # Ensure the system packages file exists
     if [ ! -f "$SYSTEM_PACKAGES" ]; then
-        echo -e "{ pkgs, ... }:\n{\n  environment.systemPackages = with pkgs; [\n    # write packages here (dynamically, no overw
+        echo -e "{ pkgs, ... }:\n{\n  environment.systemPackages = with pkgs; [\n    # write packages here (dynamically, no overwriting.)\n  ];\n}" > "$SYSTEM_PACKAGES"
+    fi
+
+    # Perform the chosen action on system configuration
+    for package in "${packages[@]}"; do
+        if [ "$action" == "add" ]; then
+            add_system_package "$package"
+        elif [ "$action" == "remove" ]; then
+            remove_system_package "$package"
+        fi
+    done
+
+    # Prompt for importing packages.nix
+    prompt_for_import "$SYSTEM_CONFIG" "$SYSTEM_PACKAGES"
+
+else
+    # Ensure the user packages file exists
+    if [ ! -f "$USER_PACKAGES" ]; then
+        mkdir -p "$(dirname "$USER_PACKAGES")"
+        echo -e "{ pkgs, ... }:\n{\n  home.packages = with pkgs; [\n    # same thing, write packages to here, no overwriting, dynamically.\n  ];\n}" > "$USER_PACKAGES"
+    fi
+
+    # Perform the chosen action on user configuration
+    for package in "${packages[@]}"; do
+        if [ "$action" == "add" ]; then
+            add_user_package "$package"
+        elif [ "$action" == "remove" ]; then
+            remove_user_package "$package"
+        fi
+    done
+
+    # Prompt for importing packages.nix
+    prompt_for_import "$USER_CONFIG" "$USER_PACKAGES"
+
+fi
+
+# Prompt for rebuild
+prompt_for_rebuild
 
