@@ -6,52 +6,25 @@ SYSTEM_PACKAGES="/etc/nixos/packages.nix"
 USER_CONFIG="$HOME/.config/home-manager/home.nix"
 USER_PACKAGES="$HOME/.config/home-manager/packages.nix"
 
-# Function to check if a package exists in nixpkgs
-search_package() {
-    package_name=$1
-    echo "Searching nixpkgs for: $package_name"
-    if nix-env -q -v 0 "$package_name" | grep -q "$package_name"; then
-        echo "Found package: $package_name"
-        return 0
-    else
-        echo "Package $package_name not found."
-        return 1
-    fi
-}
-
 # Function to add a package to the system config
 add_system_package() {
     package_name=$1
-    if search_package "$package_name"; then
-        if grep -q "\b$package_name\b" "$SYSTEM_PACKAGES"; then
-            echo "$package_name is already in the system configuration."
-        else
-            sed -i "/environment.systemPackages = with pkgs;/a \    $package_name" "$SYSTEM_PACKAGES"
-            echo "Added $package_name to system configuration."
-        fi
+    if grep -q "\b$package_name\b" "$SYSTEM_PACKAGES"; then
+        echo "$package_name is already in the system configuration."
     else
-        read -p "Is the package name $package_name correct? (y/n): " correct_response
-        if [[ "$correct_response" =~ ^[Yy]$ ]]; then
-            echo "Please check the package name or add it manually."
-        fi
+        sed -i "/environment.systemPackages = with pkgs;/a \    $package_name" "$SYSTEM_PACKAGES"
+        echo "Added $package_name to system configuration."
     fi
 }
 
 # Function to add a package to the user config
 add_user_package() {
     package_name=$1
-    if search_package "$package_name"; then
-        if grep -q "\b$package_name\b" "$USER_PACKAGES"; then
-            echo "$package_name is already in the user configuration."
-        else
-            sed -i "/home.packages = with pkgs;/a \    $package_name" "$USER_PACKAGES"
-            echo "Added $package_name to user configuration."
-        fi
+    if grep -q "\b$package_name\b" "$USER_PACKAGES"; then
+        echo "$package_name is already in the user configuration."
     else
-        read -p "Is the package name $package_name correct? (y/n): " correct_response
-        if [[ "$correct_response" =~ ^[Yy]$ ]]; then
-            echo "Please check the package name or add it manually."
-        fi
+        sed -i "/home.packages = with pkgs;/a \    $package_name" "$USER_PACKAGES"
+        echo "Added $package_name to user configuration."
     fi
 }
 
@@ -153,42 +126,5 @@ done
 if [ "$EUID" -eq 0 ]; then
     # Ensure the system packages file exists
     if [ ! -f "$SYSTEM_PACKAGES" ]; then
-        echo -e "{ pkgs, ... }:\n{\n  environment.systemPackages = with pkgs; [\n    # write packages here (dynamically, no overwriting.)\n  ];\n}" > "$SYSTEM_PACKAGES"
-    fi
-
-    # Perform the chosen action on system configuration
-    for package in "${packages[@]}"; do
-        if [ "$action" == "add" ]; then
-            add_system_package "$package"
-        elif [ "$action" == "remove" ]; then
-            remove_system_package "$package"
-        fi
-    done
-
-    # Prompt for importing packages.nix
-    prompt_for_import "$SYSTEM_CONFIG" "$SYSTEM_PACKAGES"
-
-else
-    # Ensure the user packages file exists
-    if [ ! -f "$USER_PACKAGES" ]; then
-        mkdir -p "$(dirname "$USER_PACKAGES")"
-        echo -e "{ pkgs, ... }:\n{\n  home.packages = with pkgs; [\n    # same thing, write packages to here, no overwriting, dynamically.\n  ];\n}" > "$USER_PACKAGES"
-    fi
-
-    # Perform the chosen action on user configuration
-    for package in "${packages[@]}"; do
-        if [ "$action" == "add" ]; then
-            add_user_package "$package"
-        elif [ "$action" == "remove" ]; then
-            remove_user_package "$package"
-        fi
-    done
-
-    # Prompt for importing packages.nix
-    prompt_for_import "$USER_CONFIG" "$USER_PACKAGES"
-
-fi
-
-# Prompt for rebuild
-prompt_for_rebuild
+        echo -e "{ pkgs, ... }:\n{\n  environment.systemPackages = with pkgs; [\n    # write packages here (dynamically, no overw
 
