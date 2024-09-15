@@ -2,7 +2,7 @@
 
 pkgs.stdenv.mkDerivation {
   pname = "nixpm";
-  version = "1.0.3";
+  version = "1.0.4";
   src = ./.;
   buildInputs = [ pkgs.makeWrapper ];
   buildPhase = ''
