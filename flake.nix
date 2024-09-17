@@ -13,7 +13,7 @@
     {
       nixpm = pkgs.stdenv.mkDerivation {
         pname = "nixpm";  # Name of the package
-        version = "1.0.4";  # Version of the package
+        version = "1.0.5";  # Version of the package
 
         # Source directory (current directory where flake.nix is located)
         src = ./.;

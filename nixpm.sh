@@ -32,6 +32,16 @@ backup_file() {
     cp "$file_path" "${file_path}.bak" || { print_error "Failed to backup $file_path"; exit 1; }
 }
 
+# Function to delete the .bak file after a successful rebuild
+delete_backup() {
+    backup_file="$1.bak"
+    if [ -f "$backup_file" ]; then
+        rm "$backup_file" && print_success "Backup file $backup_file deleted."
+    else
+        print_warning "No backup file $backup_file found."
+    fi
+}
+
 # Function to add a package to a config file
 add_package() {
     package_name=$1
@@ -89,12 +99,14 @@ perform_rebuild() {
         if [[ "$rebuild_response" =~ ^[Yy]$ ]]; then
             sudo nixos-rebuild switch || { print_error "Failed to rebuild system."; exit 1; }
             print_success "System rebuild successful."
+            delete_backup "$SYSTEM_PACKAGES"
         fi
     else
         read -p "Would you like to run 'home-manager switch'? (y/n): " rebuild_response
         if [[ "$rebuild_response" =~ ^[Yy]$ ]]; then
             home-manager switch || { print_error "Failed to rebuild home-manager."; exit 1; }
             print_success "Home-manager rebuild successful."
+            delete_backup "$USER_PACKAGES"
         fi
     fi
 }
