@@ -10,7 +10,6 @@ pkgs.stdenv.mkDerivation {
   '';
   installPhase = ''
     install -Dm755 nixpm.sh $out/bin/nixpm
-    install -Dm755 nshpm.sh $out/bin/nshpm
   '';
 }
 
