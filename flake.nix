@@ -14,7 +14,7 @@
       # Package for nixpm (including both nixpm and nshpm scripts)
       nixpm = pkgs.stdenv.mkDerivation {
         pname = "nixpm";  # Name of the package
-        version = "1.0.6";  # Version of the package
+        version = "1.0.7";  # Version of the package
 
         src = ./.;
 
@@ -29,12 +29,30 @@
           install -Dm755 nshpm.sh $out/bin/nshpm
         '';
       };
+
+      # Package for nshpm (if you want it separately)
+      nshpm = pkgs.stdenv.mkDerivation {
+        pname = "nshpm";  # Name of the package
+        version = "1.0.6";
+
+        src = ./.;
+
+        buildInputs = [ pkgs.makeWrapper ];
+
+        buildPhase = ''
+          mkdir -p $out/bin
+        '';
+
+        installPhase = ''
+          install -Dm755 nshpm.sh $out/bin/nshpm
+        '';
+      };
     };
 
-    # Define the default package to be built (can be either or both)
+    # Define the default package to be built
     defaultPackage.x86_64-linux = self.packages.x86_64-linux.nixpm;
 
-    # Define both apps, making them executable directly from the flake
+    # Define both apps
     apps.x86_64-linux = {
       nixpm = {
         type = "app";
@@ -42,7 +60,7 @@
       };
       nshpm = {
         type = "app";
-        program = "${self.packages.x86_64-linux.nixpm}/bin/nshpm";
+        program = "${self.packages.x86_64-linux.nshpm}/bin/nshpm";
       };
     };
   };
