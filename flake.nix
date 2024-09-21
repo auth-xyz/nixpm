@@ -11,7 +11,7 @@
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
     in
     {
-      # Package for nixpm
+      # Package for nixpm (including both nixpm and nshpm scripts)
       nixpm = pkgs.stdenv.mkDerivation {
         pname = "nixpm";  # Name of the package
         version = "1.0.6";  # Version of the package
@@ -26,23 +26,6 @@
 
         installPhase = ''
           install -Dm755 nixpm.sh $out/bin/nixpm
-        '';
-      };
-
-      # Package for nshpm
-      nshpm = pkgs.stdenv.mkDerivation {
-        pname = "nshpm";  # Name of the package
-        version = "1.0.6";  # Version of the package
-
-        src = ./.;
-
-        buildInputs = [ pkgs.makeWrapper ];
-
-        buildPhase = ''
-          mkdir -p $out/bin
-        '';
-
-        installPhase = ''
           install -Dm755 nshpm.sh $out/bin/nshpm
         '';
       };
@@ -59,7 +42,7 @@
       };
       nshpm = {
         type = "app";
-        program = "${self.packages.x86_64-linux.nshpm}/bin/nshpm";
+        program = "${self.packages.x86_64-linux.nixpm}/bin/nshpm";
       };
     };
   };
