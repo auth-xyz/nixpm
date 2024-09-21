@@ -33,7 +33,7 @@
       # Package for nshpm (if you want it separately)
       nshpm = pkgs.stdenv.mkDerivation {
         pname = "nshpm";  # Name of the package
-        version = "1.0.6";
+        version = "1.0.7";
 
         src = ./.;
 
