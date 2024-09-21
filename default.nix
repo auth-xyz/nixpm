@@ -2,7 +2,7 @@
 
 pkgs.stdenv.mkDerivation {
   pname = "nixpm";
-  version = "1.0.5";
+  version = "1.0.6";
   src = ./.;
   buildInputs = [ pkgs.makeWrapper ];
   buildPhase = ''
@@ -10,6 +10,7 @@ pkgs.stdenv.mkDerivation {
   '';
   installPhase = ''
     install -Dm755 nixpm.sh $out/bin/nixpm
+    install -Dm755 nshpm.sh $out/bin/nshpm
   '';
 }
 
